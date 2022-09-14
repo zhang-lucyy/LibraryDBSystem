@@ -1,17 +1,18 @@
-from src.swen344_db_utils import connect
+from src.swen344_db_utils import exec_commit, exec_get_all, exec_sql_file
 
-def rebuildTables():
-    conn = connect()
-    cur = conn.cursor()
+def rebuild_tables():
     drop_sql = """
-        DROP TABLE IF EXISTS example_table
+        DROP SCHEMA IF EXISTS library;
     """
-    create_sql = """
-        CREATE TABLE example_table(
-            example_col VARCHAR(40)
-        )
-    """
-    cur.execute(drop_sql)
-    cur.execute(create_sql)
-    conn.commit()
-    conn.close()
+    exec_commit(drop_sql)
+    exec_sql_file('db-lz3744/src/library_schema.sql')
+    exec_sql_file('db-lz3744/tests/test_library_schema.sql')
+
+def get_all_users():
+    users = exec_get_all('SELECT id, name FROM users ORDER BY id')
+    return users
+
+def main():
+    rebuild_tables()
+
+main()
