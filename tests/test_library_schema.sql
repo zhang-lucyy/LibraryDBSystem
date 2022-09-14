@@ -19,8 +19,9 @@ INSERT INTO checkout(user_id, checked_out)VALUES
     (1, 2),
     --Mary checked out "Scary Smart"
     (2, 3),
-    --Jackie checked out "The Lightning Thief"
-    (3, 7);
+    --Jackie checked out "The Lightning Thief" and "To Kill a Mockingbird"
+    (3, 7),
+    (3, 8);
 
 INSERT INTO checkout(user_id)VALUES
     --Art does not have any books checked out
