@@ -25,26 +25,25 @@ class TestLibrary(unittest.TestCase):
         #cur.execute('SELECT * FROM users')
         #self.assertEqual([], cur.fetchall(), "no rows in users")
         #conn.close()
-
+ 
     def test_number_of_users(self):
         "Check correct number of users in rows"
-        actual_users = get_all_users()
-        expected_users = [(1, 'Ada Lovelace'), (2, 'Mary Shelley'), 
+        actual = get_all_users()
+        expected = [(1, 'Ada Lovelace'), (2, 'Mary Shelley'), 
         (3, 'Jackie Gleason'), (4, 'Art Garfunkel')]
-        self.assertEqual(expected_users, actual_users, 'expected users not in table')
+        self.assertEqual(expected, actual, 'expected users not in table')
 
     # Test Case - Art's checked out books returns an empty list
     def test_get_art_user_books(self):
         rebuild_tables()
-        expected_output = None
-        actual_output = get_art_user_books()
+        expected = None
+        actual = get_art_user_books()
         print(get_art_user_books())
-        self.assertEqual(expected_output, actual_output, 'expected empty list from art')
+        self.assertEqual(expected, actual, 'expected empty list from art')
 
     # Test Case - Listing Jackie Gleason's checked out books in order
-    # add more books to Gleaosn's list
     def test_get_gleason_user_books(self):
-        actual_output = get_gleason_user_books()[0]
-        expected_output = "The Lightning Thief"
-        self.assertEqual(expected_output, actual_output, 'expected book The Lightning Thief to be checked out by Gleason')
+        actual = get_gleason_user_books()
+        expected = [('The Lightning Thief',), ('To Kill a Mockingbird',)]
+        self.assertEqual(expected, actual, 'expected books The Lightning Thief and To Kill a Mockingbird are checked out by Gleason')
     

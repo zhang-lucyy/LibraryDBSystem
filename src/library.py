@@ -19,7 +19,7 @@ def get_art_user_books():
     return exec_get_one("SELECT * FROM inventory INNER JOIN checkout ON inventory.book_id = checkout.checked_out WHERE checkout.user_id = 4")
 
 def get_gleason_user_books():
-    return exec_get_one("SELECT title FROM inventory INNER JOIN checkout ON inventory.book_id = checkout.checked_out WHERE checkout.user_id = 3")
+    return exec_get_all("SELECT title FROM inventory INNER JOIN checkout ON inventory.book_id = checkout.checked_out WHERE checkout.user_id = 3")
 
 def main():
     rebuild_tables()
