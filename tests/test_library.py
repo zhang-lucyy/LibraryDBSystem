@@ -47,3 +47,20 @@ class TestLibrary(unittest.TestCase):
         expected = [('The Lightning Thief',), ('To Kill a Mockingbird',)]
         self.assertEqual(expected, actual, 'expected books The Lightning Thief and To Kill a Mockingbird are checked out by Gleason')
     
+    # Test Case - List all the non-fiction books in inventory, along with the quantity
+    def test_get_nonfiction_books(self):
+        actual = get_nonfiction_books()
+        expected = [('Figuring', 'Non-fiction', 'Maria Popova', 5),
+            ('In Defence of Witches', 'Non-fiction', 'Mona Chollet', 3),
+            ('Scary Smart', 'Non-fiction', 'Mo Gawdat', 7),
+            ('The Princess Spy', 'Non-fiction', 'Larry Loftis', 2)]
+        self.assertEqual(expected, actual, 'not all expected non-fiction books are listed')
+
+    # Test Case - List all the fiction books in inventory, along with the quantity
+    def test_get_fiction_books(self):
+        actual = get_fiction_books()
+        expected = [('The Dead Romantics', 'Fiction', 'Ashley Poston', 6),
+            ('The Lord of the Rings', 'Fiction', 'J.R.R. Tolkien', 9),
+            ('The Lightning Thief', 'Fiction', 'Rick Riordan', 4),
+            ('To Kill a Mockingbird', 'Fiction', 'Harper Lee', 1)]
+        self.assertEqual(expected, actual, 'not all expected fiction books are listed')

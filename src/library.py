@@ -1,4 +1,4 @@
-from src.swen344_db_utils import *
+from swen344_db_utils import *
 
 def rebuild_tables():
     drop_sql = """
@@ -20,6 +20,18 @@ def get_art_user_books():
 
 def get_gleason_user_books():
     return exec_get_all("SELECT title FROM inventory INNER JOIN checkout ON inventory.book_id = checkout.checked_out WHERE checkout.user_id = 3")
+
+def get_nonfiction_books():
+    return exec_get_all("""
+    SELECT inventory.title, inventory.book_type, inventory.author, inventory.copies FROM 
+    inventory WHERE inventory.book_type = 'Non-fiction'
+    """)
+
+def get_fiction_books():
+    return exec_get_all("""
+    SELECT inventory.title, inventory.book_type, inventory.author, inventory.copies FROM 
+    inventory WHERE inventory.book_type = 'Fiction'
+    """)
 
 def main():
     rebuild_tables()
