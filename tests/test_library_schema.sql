@@ -22,7 +22,3 @@ INSERT INTO checkout(user_id, checked_out)VALUES
     --Jackie checked out "The Lightning Thief" and "To Kill a Mockingbird"
     (3, 7),
     (3, 8);
-
-INSERT INTO checkout(user_id)VALUES
-    --Art does not have any books checked out
-    (4);
