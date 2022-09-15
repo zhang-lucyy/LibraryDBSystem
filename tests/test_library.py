@@ -34,19 +34,28 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(expected, actual, 'expected users not in table')
 
     # Test Case - Art's checked out books returns an empty list
-    def test_get_art_user_books(self):
+    def test_get_user_books_art(self):
         rebuild_tables()
-        expected = None
-        actual = get_art_user_books()
-        print(get_art_user_books())
+        expected = []
+        actual = get_user_books(4)
         self.assertEqual(expected, actual, 'expected empty list from art')
 
     # Test Case - Listing Jackie Gleason's checked out books in order
-    def test_get_gleason_user_books(self):
-        actual = get_gleason_user_books()
-        expected = [('The Lightning Thief',), ('To Kill a Mockingbird',)]
+    def test_get_user_books_gleason(self):
+        actual = get_user_books(3)
+        expected = [('The Lightning Thief', 'Fiction', 'Rick Riordan', 2005), 
+            ('To Kill a Mockingbird', 'Fiction', 'Harper Lee', 1960)]
         self.assertEqual(expected, actual, 'expected books The Lightning Thief and To Kill a Mockingbird are checked out by Gleason')
     
+    # Test Case 
+    def test_get_checked_out_books(self):
+        actual = get_checked_out_books()
+        expected = [('In Defence of Witches', 'Non-fiction', 'Mona Chollet'),
+            ('The Lightning Thief', 'Fiction', 'Rick Riordan'),
+            ('To Kill a Mockingbird', 'Fiction', 'Harper Lee'),
+            ('Scary Smart', 'Non-fiction', 'Mo Gawdat')]
+        self.assertEqual(expected, actual, 'not all checked out books are listed')
+
     # Test Case - List all the non-fiction books in inventory, along with the quantity
     def test_get_nonfiction_books(self):
         actual = get_nonfiction_books()
@@ -56,7 +65,7 @@ class TestLibrary(unittest.TestCase):
             ('The Princess Spy', 'Non-fiction', 'Larry Loftis', 2)]
         self.assertEqual(expected, actual, 'not all expected non-fiction books are listed')
 
-    # Test Case - List all the fiction books in inventory, along with the quantity
+    # Additional Test Case - List all the fiction books in inventory, along with the quantity
     def test_get_fiction_books(self):
         actual = get_fiction_books()
         expected = [('The Dead Romantics', 'Fiction', 'Ashley Poston', 6),

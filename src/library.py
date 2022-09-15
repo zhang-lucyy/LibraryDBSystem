@@ -1,4 +1,4 @@
-from swen344_db_utils import *
+from src.swen344_db_utils import *
 
 def rebuild_tables():
     drop_sql = """
@@ -9,28 +9,32 @@ def rebuild_tables():
     exec_sql_file('db-lz3744/tests/test_library_schema.sql')
 
 def get_all_users():
-    return exec_get_all('SELECT id, name FROM users ORDER BY id ASC')
+    return exec_get_all("SELECT id, name FROM users ORDER BY id ASC")
 
-#def get_user_books(id):
-    #return exec_get_one("SELECT * FROM inventory INNER JOIN checkout ON inventory.book_id = checkout.checked_out WHERE (checkout.user_id = %s)", (id))
+def get_user_books(id):
+    return exec_get_all("""
+        SELECT title, book_type, author, publish_date 
+        FROM inventory INNER JOIN checkout ON inventory.book_id = checkout.checked_out 
+        WHERE checkout.user_id = '%(id)s' ORDER BY title ASC""",{'id': id})
 
-# need to rewrite these two test functions to take user id as parameter
-def get_art_user_books():
-    return exec_get_one("SELECT * FROM inventory INNER JOIN checkout ON inventory.book_id = checkout.checked_out WHERE checkout.user_id = 4")
-
-def get_gleason_user_books():
-    return exec_get_all("SELECT title FROM inventory INNER JOIN checkout ON inventory.book_id = checkout.checked_out WHERE checkout.user_id = 3")
+def get_checked_out_books():
+    return exec_get_all("""
+        SELECT inventory.title, inventory.book_type, inventory.author FROM users
+        INNER JOIN checkout ON checkout.user_id = users.id
+        INNER JOIN inventory ON inventory.book_id = checkout.checked_out
+        ORDER BY users.name ASC
+    """)
 
 def get_nonfiction_books():
     return exec_get_all("""
-    SELECT inventory.title, inventory.book_type, inventory.author, inventory.copies FROM 
-    inventory WHERE inventory.book_type = 'Non-fiction'
+        SELECT inventory.title, inventory.book_type, inventory.author, inventory.copies 
+        FROM inventory WHERE inventory.book_type = 'Non-fiction'
     """)
 
 def get_fiction_books():
     return exec_get_all("""
-    SELECT inventory.title, inventory.book_type, inventory.author, inventory.copies FROM 
-    inventory WHERE inventory.book_type = 'Fiction'
+        SELECT inventory.title, inventory.book_type, inventory.author, inventory.copies FROM 
+        inventory WHERE inventory.book_type = 'Fiction'
     """)
 
 def main():
