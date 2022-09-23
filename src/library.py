@@ -1,4 +1,4 @@
-from swen344_db_utils import *
+from src.swen344_db_utils import *
 
 def rebuild_tables():
     drop_sql = """
@@ -6,7 +6,6 @@ def rebuild_tables():
     """
     exec_commit(drop_sql)
     exec_sql_file('db-lz3744/src/library_schema.sql')
-    exec_sql_file('db-lz3744/tests/test_library_schema.sql')
 
 def get_all_users():
     return exec_get_all("SELECT id, name FROM users ORDER BY id ASC")
@@ -47,6 +46,11 @@ def search_by_author(author):
         SELECT inventory.title, inventory.book_type, inventory.author, 
         inventory.publish_date, inventory.copies FROM inventory 
         WHERE inventory.author = %(author)s""", {'author': author})
+
+def create_account(name, contact_info):
+    return exec_commit("""
+        INSERT INTO users (name, contact_info) VALUES (%s, %s)
+        RETURNING name, contact""", {name, contact_info})
 
 def main():
     rebuild_tables()
