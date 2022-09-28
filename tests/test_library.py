@@ -67,3 +67,20 @@ class TestLibrary(unittest.TestCase):
         actual = search_by_author('Harper Lee')[0]
         self.assertEqual(expected, actual, "not all books by Harper Lee are listed")
         print("\nBooks in inventory by Harper Lee:", actual)
+
+    def test_create_account(self):
+        create_account('Christopher Marlowe', 'CMarlowe@gmail.com')
+        expected1 = [(5, 'Christopher Marlowe', 'CMarlowe@gmail.com')]
+        actual1 = exec_get_all("""
+            SELECT * From users WHERE name = \'Christopher Marlowe\'
+        """)
+
+        create_account('Francis Bacon', 'FBacon@gmail.com')
+        expected2 = [(6, 'Francis Bacon', 'FBacon@gmail.com')]
+        actual2 = exec_get_all("""
+            SELECT * From users WHERE name = \'Francis Bacon\'
+        """)
+
+        self.assertEqual(expected1, actual1, "did not create an account for Christopher Marlowe")
+        self.assertEqual(expected2, actual2, "did not create an account for Francis Bacon")
+        print("\nChristopher Marlowe and Francis Bacon each sign up for a new account")
