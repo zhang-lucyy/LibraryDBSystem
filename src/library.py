@@ -49,8 +49,8 @@ def search_by_author(author):
 
 def create_account(name, contact_info):
     return exec_commit("""
-        INSERT INTO users (name, contact_info) VALUES (%s, %s)
-        RETURNING name, contact""", {name, contact_info})
+        INSERT INTO users (name, contact_info) VALUES (%(name)s, %(contact_info)s)
+        """, {'name': name, 'contact_info': contact_info})
 
 def main():
     rebuild_tables()
