@@ -10,6 +10,9 @@ def rebuild_tables():
 def get_all_users():
     return exec_get_all("SELECT id, name FROM users ORDER BY id ASC")
 
+def get_user_id(name):
+    return exec_get_one("SELECT id FROM users WHERE users.name = %(name)s", {'name': name})
+
 def get_user_contact_info(id):
     return exec_get_one("""
         SELECT contact_info FROM users INNER JOIN checkout 
@@ -47,10 +50,37 @@ def search_by_author(author):
         inventory.publish_date, inventory.copies FROM inventory 
         WHERE inventory.author = %(author)s""", {'author': author})
 
+def search_by_title(title):
+    return exec_get_all("""
+        SELECT inventory.title, inventory.book_type, inventory.author, 
+        inventory.publish_date, inventory.copies FROM inventory 
+        WHERE inventory.title = %(title)s""", {'title': title})
+
 def create_account(name, contact_info):
     return exec_commit("""
         INSERT INTO users (name, contact_info) VALUES (%(name)s, %(contact_info)s)
         """, {'name': name, 'contact_info': contact_info})
+
+def delete_account(name):
+    user_id = get_user_id(name)
+    exec_commit("""
+        DELETE FROM return WHERE return.user_id = %(user_id)s""", {'user_id': user_id})
+
+    return exec_commit("""
+        DELETE FROM users WHERE users.name = %(name)s""", {'name': name})
+
+def return_book(book_id, user_id, date_returned):
+    exec_commit("""
+        UPDATE inventory SET copies = (copies + 1)
+        WHERE book_id = %(book_id)s""", {'book_id': book_id})
+
+    exec_commit("""
+        DELETE FROM checkout WHERE checkout.checked_out = %(book_id)s""", {'book_id': book_id})
+    
+    return exec_commit("""
+        INSERT INTO return (return_book_id, return_book_date, user_id) 
+        VALUES (%(book_id)s, %(date_returned)s, %(user_id)s)""", 
+        {'book_id': book_id, 'date_returned': date_returned, 'user_id': user_id})
 
 def main():
     rebuild_tables()
