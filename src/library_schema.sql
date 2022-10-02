@@ -1,3 +1,5 @@
+DROP SCHEMA IF EXISTS library CASCADE;
+DROP TABLE IF EXISTS return;
 DROP TABLE IF EXISTS checkout;
 DROP TABLE IF EXISTS inventory;
 DROP TABLE IF EXISTS users;
@@ -39,7 +41,7 @@ INSERT INTO users(name, contact_info) VALUES
     ('Jackie Gleason', 'JGleason@gmail.com'),
     ('Art Garfunkel', 'AGarfunkel@gmail.com');
 
-INSERT INTO inventory(title, book_type, author, publish_date, copies) VALUES
+INSERT INTO inventory(title, book_type, author, publish_date, summary, copies) VALUES
     ('Figuring', 'Non-fiction', 'Maria Popova', 2019, 'Explores the complexities
         of love and the human search for truth and meaning', 5),
     ('In Defence of Witches', 'Non-fiction', 'Mona Chollet', 2022, 'Explores how
@@ -48,7 +50,7 @@ INSERT INTO inventory(title, book_type, author, publish_date, copies) VALUES
     ('The Princess Spy', 'Non-fiction', 'Larry Loftis', 2022, 'Follows the hidden history 
         of an ordinary American girl who became one of the most daring WWII spies', 2),
     ('The Dead Romantics', 'Fiction', 'Ashley Poston', 2022,
-        'The main character is a ghostwriter for a romance novelist' 6),
+        'The main character is a ghostwriter for a romance novelist', 6),
     ('The Lord of the Rings', 'Fiction', 'J.R.R. Tolkien', 1954, 
         'A group of heroes set forth to save their world', 9),
     ('The Lightning Thief', 'Fiction', 'Rick Riordan', 2005, 
