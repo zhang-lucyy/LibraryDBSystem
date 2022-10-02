@@ -4,7 +4,7 @@ from src.library import *
 
 class TestLibrary(unittest.TestCase):
     
-    def set_up(self):
+    def set_up():
         rebuild_tables()
 
     def test_verify_users_rows(self):
@@ -45,7 +45,7 @@ class TestLibrary(unittest.TestCase):
         print("\nJackie Gleason's checked out books in alphabetical order:", actual)
     
     def test_get_checked_out_books(self):
-        expected = 4
+        expected = 3
         actual = get_checked_out_books()
         self.assertEqual(expected, actual.__len__(), "not all checked out books are listed")
         print("\nAll checked out books ordered by user name:", actual)
@@ -84,3 +84,15 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(expected1, actual1, "did not create an account for Christopher Marlowe")
         self.assertEqual(expected2, actual2, "did not create an account for Francis Bacon")
         print("\nChristopher Marlowe and Francis Bacon each sign up for a new account")
+    
+    def test_delete_account(self):
+        return_book(3, 2, '2020-09-10')
+        delete_account('Mary Shelley')
+        expected = []
+        actual = exec_get_all("""
+            SELECT * From users WHERE name = 'Mary Shelley'
+        """)
+
+        self.assertEqual(expected, search_by_title('The Last Man'))
+        self.assertEqual(expected, actual, "Mary Shelley's account should be deleted")
+        print('\nMary Shelley deletes her account after finding no copies of "The Last Man" in the library')
