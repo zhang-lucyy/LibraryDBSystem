@@ -21,18 +21,29 @@ CREATE TABLE inventory(
 );
 
 CREATE TABLE checkout(
-    checked_out INTEGER,
+    book_id INTEGER,
     user_id INTEGER,
+    check_out_date DATE,
     FOREIGN KEY(user_id) REFERENCES users(id),
-    FOREIGN KEY(checked_out) REFERENCES inventory(book_id)
+    FOREIGN KEY(book_id) REFERENCES inventory(book_id)
 );
 
 CREATE TABLE return(
-    return_book_id INTEGER,
-    return_book_date DATE,
+    book_id INTEGER,
     user_id INTEGER,
+    checked_out_date DATE,
+    return_date DATE,
     FOREIGN KEY(user_id) REFERENCES users(id),
-    FOREIGN KEY(return_book_id) REFERENCES inventory(book_id)
+    FOREIGN KEY(book_id) REFERENCES inventory(book_id)
+);
+
+CREATE TABLE reserve(
+    reserve_book_id INTEGER,
+    user_id INTEGER,
+    book_copies INTEGER,
+    CHECK(book_copies = 0),
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(reserve_book_id) REFERENCES inventory(book_id)
 );
 
 INSERT INTO users(name, contact_info) VALUES
@@ -58,11 +69,11 @@ INSERT INTO inventory(title, book_type, author, publish_date, summary, copies) V
     ('To Kill a Mockingbird', 'Fiction', 'Harper Lee', 1960,
         'Chronicles the childhood of Scout and Jem Finch',1);
 
-INSERT INTO checkout(user_id, checked_out)VALUES
+INSERT INTO checkout(user_id, book_id, check_out_date)VALUES
     --Ada checked out "In Defence of Witches"
-    (1, 2),
+    (1, 2, '2020-09-05'),
     --Mary checked out "Scary Smart"
-    (2, 3),
+    (2, 3, '2020-09-08'),
     --Jackie checked out "The Lightning Thief" and "To Kill a Mockingbird"
-    (3, 7),
-    (3, 8);
+    (3, 7, '2020-09-10'),
+    (3, 8, '2020-09-11');
