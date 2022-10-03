@@ -21,14 +21,14 @@ def get_user_contact_info(id):
 def get_user_books(id):
     return exec_get_all("""
         SELECT title, book_type, author, publish_date 
-        FROM inventory INNER JOIN checkout ON inventory.book_id = checkout.checked_out 
+        FROM inventory INNER JOIN checkout ON inventory.book_id = checkout.book_id
         WHERE checkout.user_id = '%(id)s' ORDER BY title ASC""",{'id': id})
 
 def get_checked_out_books():
     return exec_get_all("""
         SELECT inventory.title, inventory.book_type, inventory.author FROM users
         INNER JOIN checkout ON checkout.user_id = users.id
-        INNER JOIN inventory ON inventory.book_id = checkout.checked_out
+        INNER JOIN inventory ON inventory.book_id = checkout.book_id
         ORDER BY users.name ASC
     """)
 
@@ -69,18 +69,30 @@ def delete_account(name):
     return exec_commit("""
         DELETE FROM users WHERE users.name = %(name)s""", {'name': name})
 
+def checkout_book(book_id, user_id, check_out_date):
+    return exec_commit("""
+        INSERT INTO checkout (book_id, user_id, check_out_date)
+        VALUES (%(book_id)s, %(user_id)s, %(check_out_date)s)""",
+        {'book_id': book_id, 'user_id': user_id, 'check_out_date': check_out_date})
+
 def return_book(book_id, user_id, date_returned):
     exec_commit("""
         UPDATE inventory SET copies = (copies + 1)
         WHERE book_id = %(book_id)s""", {'book_id': book_id})
 
     exec_commit("""
-        DELETE FROM checkout WHERE checkout.checked_out = %(book_id)s""", {'book_id': book_id})
+        DELETE FROM checkout WHERE checkout.book_id = %(book_id)s""", {'book_id': book_id})
     
     return exec_commit("""
-        INSERT INTO return (return_book_id, return_book_date, user_id) 
+        INSERT INTO return (book_id, return_date, user_id) 
         VALUES (%(book_id)s, %(date_returned)s, %(user_id)s)""", 
         {'book_id': book_id, 'date_returned': date_returned, 'user_id': user_id})
+
+def reserve_book(book_id, user_id):
+    return exec_commit("""
+        INSERT INTO reserve(reserve_book_id, user_id)
+        VALUES (%(book_id)s, %(user_id)s)""",
+        {'reserve_book_id': book_id, 'user_id': user_id})
 
 def main():
     rebuild_tables()
