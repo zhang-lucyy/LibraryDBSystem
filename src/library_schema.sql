@@ -1,4 +1,5 @@
 DROP SCHEMA IF EXISTS library CASCADE;
+DROP TABLE IF EXISTS reserve;
 DROP TABLE IF EXISTS return;
 DROP TABLE IF EXISTS checkout;
 DROP TABLE IF EXISTS inventory;
@@ -40,8 +41,6 @@ CREATE TABLE return(
 CREATE TABLE reserve(
     reserve_book_id INTEGER,
     user_id INTEGER,
-    book_copies INTEGER,
-    CHECK(book_copies = 0),
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(reserve_book_id) REFERENCES inventory(book_id)
 );
@@ -63,11 +62,13 @@ INSERT INTO inventory(title, book_type, author, publish_date, summary, copies) V
     ('The Dead Romantics', 'Fiction', 'Ashley Poston', 2022,
         'The main character is a ghostwriter for a romance novelist', 6),
     ('The Lord of the Rings', 'Fiction', 'J.R.R. Tolkien', 1954, 
-        'A group of heroes set forth to save their world', 9),
+        'A group of heroes set forth to save their world', 0),
     ('The Lightning Thief', 'Fiction', 'Rick Riordan', 2005, 
         'A 12 year-old boy who learns that his true father is Poseidon', 4),
     ('To Kill a Mockingbird', 'Fiction', 'Harper Lee', 1960,
-        'Chronicles the childhood of Scout and Jem Finch',1);
+        'Chronicles the childhood of Scout and Jem Finch',1),
+    ('Frankenstein', 'Fiction', 'Mary Shelley', 1818,
+        'A young scientist who creates a sapient creature in an scientific experiment', 1);
 
 INSERT INTO checkout(user_id, book_id, check_out_date)VALUES
     --Ada checked out "In Defence of Witches"
