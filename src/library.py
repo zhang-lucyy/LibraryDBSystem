@@ -61,6 +61,11 @@ def get_book_copies(book_id):
         SELECT inventory.copies FROM inventory WHERE inventory.book_id
         = %(book_id)s""", {'book_id': book_id})
 
+def get_book_id(title):
+    return exec_get_one("""
+        SELECT inventory.copies FROM inventory WHERE inventory.title
+        = %(title)s""", {'title': title})
+
 def get_check_out_date(book_id):
     return exec_get_one("""
         SELECT check_out_date FROM checkout WHERE checkout.book_id
