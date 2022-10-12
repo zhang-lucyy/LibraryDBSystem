@@ -63,14 +63,14 @@ def get_book_copies(book_id):
 
 def get_book_id(title):
     return exec_get_one("""
-        SELECT inventory.copies FROM inventory WHERE inventory.title
+        SELECT inventory.book_id FROM inventory WHERE inventory.title
         = %(title)s""", {'title': title})
 
-def get_check_out_date(book_id):
+def get_check_out_date(book_id, user_id):
     return exec_get_one("""
         SELECT check_out_date FROM checkout WHERE checkout.book_id
-        = %(book_id)s AND 
-    """)
+        = %(book_id)s AND checkout.user_id = %(user_id)s""",
+        {'book_id': book_id, 'user_id': user_id})
 
 def create_account(name, contact_info):
     return exec_commit("""
@@ -100,10 +100,10 @@ def return_book(book_id, user_id, date_returned):
         UPDATE inventory SET copies = (copies + 1)
         WHERE book_id = %(book_id)s""", {'book_id': book_id})
 
-    checked_out_date = get_check_out_date(book_id)
+    checked_out_date = get_check_out_date(book_id, user_id)
     
     book = exec_commit("""
-        INSERT INTO return (book_id, user_id, check_out_date, return_date) 
+        INSERT INTO return (book_id, user_id, checked_out_date, return_date) 
         VALUES (%(book_id)s, %(user_id)s, %(checked_out_date)s, %(date_returned)s)""", 
         {'book_id': book_id, 'user_id': user_id, 'checked_out_date': checked_out_date,'date_returned': date_returned})
 
@@ -112,13 +112,13 @@ def return_book(book_id, user_id, date_returned):
 
     return book;
 
-def reserve_book(book_id, user_id):
-    book_copies = get_book_copies(book_id)
-    if (book_copies == 0):
+def reserve_book(reserve_book_id, user_id):
+    book_copies = get_book_copies(reserve_book_id)
+    if (book_copies[0] == 0):
         return exec_commit("""
             INSERT INTO reserve(reserve_book_id, user_id)
-            VALUES (%(book_id)s, %(user_id)s)""",
-            {'reserve_book_id': book_id, 'user_id': user_id})
+            VALUES (%(reserve_book_id)s, %(user_id)s)""",
+            {'reserve_book_id': reserve_book_id, 'user_id': user_id})
     else:
         raise Exception("copies of the book are still available")
 
