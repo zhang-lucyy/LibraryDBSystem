@@ -1,3 +1,4 @@
+import datetime
 import unittest
 from src.swen344_db_utils import *
 from src.library import *
@@ -105,6 +106,18 @@ class TestLibrary(unittest.TestCase):
 
         self.assertEqual(expected, actual, "did not successfully reserve a book")
         print("\nJackie Gleason successfully reserves a book")
+
+    def test_return_book(self):
+        user_id = get_user_id('Art Garfunkel')
+        book_id = get_book_id("Frankenstein")
+        checkout_book(book_id, user_id, '2020-09-10')
+        return_book(book_id, user_id, '2020-09-13')
+        expected = [(9, 4, datetime.date(2020, 9, 10), datetime.date(2020, 9, 13))]
+        actual = exec_get_all("""
+            SELECT * From return WHERE user_id = %(user_id)s""",
+            {'user_id': user_id})
+
+        self.assertEqual(expected, actual, "Art did not return the book")
 
     def test_delete_account(self):
         return_book(3, 2, '2020-09-10')
