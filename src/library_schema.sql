@@ -25,23 +25,15 @@ CREATE TABLE checkout(
     book_id INTEGER,
     user_id INTEGER,
     check_out_date DATE,
-    FOREIGN KEY(user_id) REFERENCES users(id),
-    FOREIGN KEY(book_id) REFERENCES inventory(book_id)
-);
-
-CREATE TABLE return(
-    book_id INTEGER,
-    user_id INTEGER,
-    checked_out_date DATE,
-    return_date DATE,
-    FOREIGN KEY(user_id) REFERENCES users(id),
+    return_date DATE DEFAULT NULL,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(book_id) REFERENCES inventory(book_id)
 );
 
 CREATE TABLE reserve(
     reserve_book_id INTEGER,
     user_id INTEGER,
-    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(reserve_book_id) REFERENCES inventory(book_id)
 );
 
