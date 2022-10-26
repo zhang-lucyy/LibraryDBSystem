@@ -24,7 +24,7 @@ def get_user_id(name):
 '''
 Returns a user's contact info given their user id.
 Parameter:
-    id(): A user id
+    id(int): A user id.
 '''
 def get_user_contact_info(id):
     return exec_get_one("""
@@ -34,7 +34,7 @@ def get_user_contact_info(id):
 '''
 Returns all the books currently checked out by a user.
 Parameter:
-    id(): A user id
+    id(int): A user id.
 '''
 def get_user_books(id):
     return exec_get_all("""
@@ -98,7 +98,7 @@ def search_by_title(title):
 '''
 Returns the number of book copies left given the book id.
 Parameter:
-    book_id(): A book's id.
+    book_id(int): A book's id.
 ''' 
 def get_book_copies(book_id):
     return exec_get_one("""
@@ -136,7 +136,11 @@ def delete_account(name):
         DELETE FROM users WHERE users.name = %(name)s""", {'name': name})
 
 '''
-
+User checks out a book.
+Parameter:
+    book_id(int): A book id.
+    user_id(int): A user id.
+    check_out_date(date): The date the book is checked out.
 '''
 def checkout_book(book_id, user_id, check_out_date):
     exec_commit("""
@@ -148,6 +152,13 @@ def checkout_book(book_id, user_id, check_out_date):
         VALUES (%(book_id)s, %(user_id)s, %(check_out_date)s)""",
         {'book_id': book_id, 'user_id': user_id, 'check_out_date': check_out_date})
 
+'''
+User returns a book.
+Parameter:
+    book_id(int): A book id.
+    user_id(int): A user id.
+    return date(date): The date the book is returned.
+'''
 def return_book(book_id, user_id, return_date):
     exec_commit("""
         UPDATE inventory SET copies = (copies + 1)
@@ -159,6 +170,13 @@ def return_book(book_id, user_id, return_date):
         AND user_id = %(user_id)s""",
         {'return_date': return_date, 'book_id': book_id, 'user_id': user_id})
 
+'''
+User reserves a book, only reserves successfully if there are no copies
+of the book left in the inventory.
+Parameters:
+    reserve_book_id(int): A book id.
+    user_id(int): A user id.
+'''
 def reserve_book(reserve_book_id, user_id):
     book_copies = get_book_copies(reserve_book_id)
     if (book_copies[0] == 0):
