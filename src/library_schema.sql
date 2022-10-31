@@ -62,11 +62,11 @@ INSERT INTO inventory(title, book_type, author, publish_date, summary, copies) V
     ('Frankenstein', 'Fiction', 'Mary Shelley', 1818,
         'A young scientist who creates a sapient creature in an scientific experiment', 1);
 
-INSERT INTO checkout(user_id, book_id, check_out_date)VALUES
+INSERT INTO checkout(user_id, book_id, check_out_date, return_date)VALUES
     --Ada checked out "In Defence of Witches"
-    (1, 2, '2020-09-05'),
+    (1, 2, '2020-09-05', '2020-09-07'),
     --Mary checked out "Scary Smart"
-    (2, 3, '2020-09-08'),
+    (2, 3, '2020-09-08', DEFAULT),
     --Jackie checked out "The Lightning Thief" and "To Kill a Mockingbird"
-    (3, 7, '2020-09-10'),
-    (3, 8, '2020-09-11');
+    (3, 7, '2020-09-10', DEFAULT),
+    (3, 8, '2020-09-11', DEFAULT);
