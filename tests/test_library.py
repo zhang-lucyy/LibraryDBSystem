@@ -21,7 +21,7 @@ class TestLibrary(unittest.TestCase):
         print("\nNumber of rows in inventory table:", actual)
 
     def test_verify_checkout_rows(self):
-        expected = 4
+        expected = 5
         actual = get_checked_out_books().__len__()
         self.assertEqual(expected, actual, "incorrect count of rows for checkout table")
         print("\nNumber of rows in checkout table:", actual)
@@ -44,12 +44,6 @@ class TestLibrary(unittest.TestCase):
         actual = get_user_books(3)
         self.assertEqual(expected, actual.__len__(), "expected books The Lightning Thief and To Kill a Mockingbird are checked out by Gleason")
         print("\nJackie Gleason's checked out books in alphabetical order:", actual)
-    
-    def test_get_checked_out_books(self):
-        expected = 3
-        actual = get_checked_out_books()
-        self.assertEqual(expected, actual.__len__(), "not all checked out books are listed")
-        print("\nAll checked out books ordered by user name:", actual)
 
     def test_get_nonfiction_books(self):
         expected = 4
@@ -114,10 +108,11 @@ class TestLibrary(unittest.TestCase):
         return_book(book_id, user_id, '2020-09-13')
         expected = [(9, 4, datetime.date(2020, 9, 10), datetime.date(2020, 9, 13))]
         actual = exec_get_all("""
-            SELECT * From return WHERE user_id = %(user_id)s""",
+            SELECT * From checkout WHERE user_id = %(user_id)s""",
             {'user_id': user_id})
 
         self.assertEqual(expected, actual, "Art did not return the book")
+        print('\nArt Garfunkel returns a copy of “Frankenstein” three days after he borrowed it')
 
     def test_delete_account(self):
         return_book(3, 2, '2020-09-10')
@@ -130,3 +125,9 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(expected, search_by_title('The Last Man'))
         self.assertEqual(expected, actual, "Mary Shelley's account should be deleted")
         print('\nMary Shelley deletes her account after finding no copies of "The Last Man" in the library')
+
+    def test_get_checked_out_books(self):
+        expected = 3
+        actual = get_checked_out_books()
+        self.assertEqual(expected, actual.__len__(), "not all checked out books are listed")
+        print("\nThe librarian gets a list of all books checked out:", actual)
