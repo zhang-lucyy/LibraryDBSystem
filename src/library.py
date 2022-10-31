@@ -43,16 +43,17 @@ def get_user_books(id):
         WHERE checkout.user_id = '%(id)s' ORDER BY title ASC""",{'id': id})
 
 '''
-Returns a list of all books checked out (sorted by author).
+Returns a list of all books checked out (sorted by book type / author).
 For each book, it says who checked it out and when; return date (or if not returned);
 remaining copies.
 '''
 def get_checked_out_books():
     return exec_get_all("""
-        SELECT inventory.title, users.name, checkout.check_out_date, inventory.copies FROM users
+        SELECT inventory.title, users.name, checkout.check_out_date, checkout.return_date,
+        inventory.copies FROM users
         INNER JOIN checkout ON checkout.user_id = users.id
         INNER JOIN inventory ON inventory.book_id = checkout.book_id
-        ORDER BY inventory.author ASC
+        ORDER BY inventory.book_type, inventory.author ASC
     """)
 
 '''
