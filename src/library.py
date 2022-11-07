@@ -1,3 +1,4 @@
+import csv
 from src.swen344_db_utils import *
 
 def rebuild_tables():
@@ -30,6 +31,14 @@ def get_user_contact_info(id):
     return exec_get_one("""
         SELECT contact_info FROM users INNER JOIN checkout 
         ON checkout.user_id = '%(id)s'""", {'id': id})
+
+'''
+Returns all of the books in inventory.
+'''
+def get_all_books():
+    return exec_get_all("""
+        SELECT * FROM inventory
+    """)
 
 '''
 Returns all the books currently checked out by a user.
@@ -188,6 +197,27 @@ def reserve_book(reserve_book_id, user_id):
     else:
         raise Exception("copies of the book are still available")
 
+'''
+Loads the set of information on books from a file and adds it to the database.
+Parameter:
+    filename(str): Csv file with test data.
+'''
+def insert_data_from_csv(filename):
+    with open(filename) as csv_file:
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)
+
+        for record in csv_reader:
+            title = record[0]
+            author = record[1]
+            summary = record[2]
+            book_type = record[3]
+            copies = record[5]
+
+            exec_commit("""
+                INSERT INTO inventory(title, book_type, author, publish_date, summary, copies)
+                VALUES (%(title)s, %(book_type)s, %(author)s, NULL, %(summary)s, %(copies)s)""",
+                {'title': title, 'book_type': book_type, 'author': author, 'summary': summary, 'copies': copies})
 
 def main():
     rebuild_tables()
