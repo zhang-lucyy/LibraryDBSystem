@@ -133,7 +133,7 @@ class TestLibrary(unittest.TestCase):
         print("\nThe librarian gets a list of all books checked out:", actual)
 
     def test_insert_data_from_csv(self):
-        insert_data_from_csv('src/library.csv')
+        insert_data_from_csv('src/Library.csv')
         expected = 28   # 19 from csv + 9 from schema insert
         actual = get_all_books().__len__()
         self.assertEqual(expected, actual, 'something wrong about book data')
