@@ -15,7 +15,7 @@ class TestLibrary(unittest.TestCase):
         print("\nNumber of rows in users table:", actual)
 
     def test_verify_inventory_rows(self):
-        expected = 9
+        expected = 21
         actual = get_nonfiction_books().__len__() + get_fiction_books().__len__()
         self.assertEqual(expected, actual, "incorrect count of rows for inventory table")
         print("\nNumber of rows in inventory table:", actual)
@@ -131,3 +131,10 @@ class TestLibrary(unittest.TestCase):
         actual = get_checked_out_books()
         self.assertEqual(expected, actual.__len__(), "not all checked out books are listed")
         print("\nThe librarian gets a list of all books checked out:", actual)
+
+    def test_insert_data_from_csv(self):
+        insert_data_from_csv('src/library.csv')
+        expected = 28   # 19 from csv + 9 from schema insert
+        actual = get_all_books().__len__()
+        self.assertEqual(expected, actual, 'something wrong about book data')
+        print("\nAll .csv books loaded successfully into database")
