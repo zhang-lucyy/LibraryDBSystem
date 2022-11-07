@@ -16,7 +16,7 @@ CREATE TABLE inventory(
     title TEXT NOT NULL,
     book_type TEXT NOT NULL,
     author TEXT NOT NULL,
-    publish_date INTEGER NOT NULL,
+    publish_date INTEGER DEFAULT NULL,
     summary TEXT DEFAULT '' NOT NULL,
     copies INTEGER DEFAULT 0 NOT NULL
 );
