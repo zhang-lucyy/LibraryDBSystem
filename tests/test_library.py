@@ -65,13 +65,13 @@ class TestLibrary(unittest.TestCase):
 
     def test_create_account(self):
         create_account('Christopher Marlowe', 'CMarlowe@gmail.com')
-        expected1 = [(5, 'Christopher Marlowe', 'CMarlowe@gmail.com')]
+        expected1 = [(5, 'Christopher Marlowe', 'CMarlowe@gmail.com', False)]
         actual1 = exec_get_all("""
             SELECT * From users WHERE name = \'Christopher Marlowe\'
         """)
 
         create_account('Francis Bacon', 'FBacon@gmail.com')
-        expected2 = [(6, 'Francis Bacon', 'FBacon@gmail.com')]
+        expected2 = [(6, 'Francis Bacon', 'FBacon@gmail.com', False)]
         actual2 = exec_get_all("""
             SELECT * From users WHERE name = \'Francis Bacon\'
         """)

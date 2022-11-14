@@ -8,7 +8,8 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users(
     id SERIAL NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
-    contact_info TEXT NOT NULL 
+    contact_info TEXT NOT NULL,
+    locked BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE inventory(
