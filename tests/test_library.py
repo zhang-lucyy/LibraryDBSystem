@@ -20,6 +20,14 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(expected, actual, "incorrect count of rows for inventory table")
         print("\nNumber of rows in inventory table:", actual)
 
+    def test_verify_library_rows(self):
+        expected = 4
+        actual = exec_get_all("""
+            SELECT * FROM libraries
+        """)
+        self.assertEqual(expected, actual.__len__(), "not all libraries are listed")
+        print("\nLibraries:", actual)
+
     def test_verify_checkout_rows(self):
         expected = 5
         actual = get_checked_out_books().__len__()
@@ -104,9 +112,9 @@ class TestLibrary(unittest.TestCase):
     def test_return_book(self):
         user_id = get_user_id('Art Garfunkel')
         book_id = get_book_id("Frankenstein")
-        checkout_book(book_id, user_id, '2020-09-10')
-        return_book(book_id, user_id, '2020-09-13')
-        expected = [(9, 4, datetime.date(2020, 9, 10), datetime.date(2020, 9, 13))]
+        checkout_book(1, book_id, user_id, '2020-09-10')
+        return_book(1, book_id, user_id, '2020-09-13')
+        expected = [(1, 9, 4, datetime.date(2020, 9, 10), datetime.date(2020, 9, 13))]
         actual = exec_get_all("""
             SELECT * From checkout WHERE user_id = %(user_id)s""",
             {'user_id': user_id})
@@ -115,7 +123,7 @@ class TestLibrary(unittest.TestCase):
         print('\nArt Garfunkel returns a copy of “Frankenstein” three days after he borrowed it')
 
     def test_delete_account(self):
-        return_book(3, 2, '2020-09-10')
+        return_book(3, 3, 2, '2020-09-10')
         delete_account('Mary Shelley')
         expected = []
         actual = exec_get_all("""
