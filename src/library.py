@@ -170,39 +170,58 @@ def delete_account(name):
         DELETE FROM users WHERE users.name = %(name)s""", {'name': name})
 
 '''
-User checks out a book.
+User checks out a book at a given library.
 Parameter:
+    library_id(int): A library id.
     book_id(int): A book id.
     user_id(int): A user id.
     check_out_date(date): The date the book is checked out.
 '''
-def checkout_book(book_id, user_id, check_out_date):
+def checkout_book(library_id, book_id, user_id, check_out_date):
+    # updates master inventory
     exec_commit("""
         UPDATE inventory SET copies = (copies - 1)
         WHERE book_id = %(book_id)s""", {'book_id': book_id})
 
+    # updates library inventory
     exec_commit("""
-        INSERT INTO checkout (book_id, user_id, check_out_date)
-        VALUES (%(book_id)s, %(user_id)s, %(check_out_date)s)""",
-        {'book_id': book_id, 'user_id': user_id, 'check_out_date': check_out_date})
+        UPDATE library_stock SET book_copies = (book_copies - 1)
+        WHERE book_id = %(book_id)s
+        AND library_stock.library_id = %(library_id)s""",
+        {'book_id': book_id, 'library_id': library_id})
+
+    exec_commit("""
+        INSERT INTO checkout (library_id, book_id, user_id, check_out_date)
+        VALUES (%(library_id)s, %(book_id)s, %(user_id)s, %(check_out_date)s)""",
+        {'library_id': library_id, 'book_id': book_id, 'user_id': user_id, 'check_out_date': check_out_date})
 
 '''
-User returns a book.
+User returns a book at a given library.
 Parameter:
+    library_id(int): A library id.
     book_id(int): A book id.
     user_id(int): A user id.
     return date(date): The date the book is returned.
 '''
-def return_book(book_id, user_id, return_date):
+def return_book(library_id, book_id, user_id, return_date):
+    # updates master inventory
     exec_commit("""
         UPDATE inventory SET copies = (copies + 1)
         WHERE book_id = %(book_id)s""", {'book_id': book_id})
+
+    # updates library inventory
+    exec_commit("""
+        UPDATE library_stock SET book_copies = (book_copies + 1)
+        WHERE book_id = %(book_id)s
+        AND library_stock.library_id = %(library_id)s""",
+        {'book_id': book_id, 'library_id': library_id})
     
     exec_commit("""
         UPDATE checkout SET return_date = %(return_date)s
         WHERE book_id = %(book_id)s
-        AND user_id = %(user_id)s""",
-        {'return_date': return_date, 'book_id': book_id, 'user_id': user_id})
+        AND user_id = %(user_id)s
+        AND checkout.library_id = %(library_id)s""",
+        {'return_date': return_date, 'book_id': book_id, 'user_id': user_id, 'library_id': library_id})
 
 '''
 User reserves a book, only reserves successfully if there are no copies
