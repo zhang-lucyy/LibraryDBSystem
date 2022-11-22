@@ -93,15 +93,15 @@ class TestLibrary(unittest.TestCase):
         book_id = get_book_id('Figuring')
 
         with self.assertRaises(Exception) as cannot_reserve:
-            reserve_book(book_id, user_id)
+            reserve_book(1, book_id, user_id)
             self.assertTrue('Copies are still available' in cannot_reserve.exception)
         print("\nJackie Gleason reserves a book incorrectly")
 
     def test_reserve_book_success(self):
         user_id = get_user_id('Jackie Gleason')
         book_id = get_book_id('The Lord of the Rings')
-        reserve_book(book_id, user_id)
-        expected = [(6, 3)]
+        reserve_book(1, book_id, user_id)
+        expected = [(1, 6, 3)]
         actual = exec_get_all("""
             SELECT * From reserve WHERE user_id = %(user_id)s""",
             {'user_id': user_id})
