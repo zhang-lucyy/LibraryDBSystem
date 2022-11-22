@@ -10,7 +10,6 @@ CREATE TABLE users(
     id SERIAL NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
     contact_info TEXT NOT NULL,
-    locked BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE inventory(
@@ -41,6 +40,7 @@ CREATE TABLE checkout(
     book_id INTEGER,
     user_id INTEGER,
     check_out_date DATE,
+    due_date DATE DEFAULT NULL,
     return_date DATE DEFAULT NULL,
     FOREIGN KEY(library_id) REFERENCES libraries(library_id),
     FOREIGN KEY(book_id) REFERENCES inventory(book_id),
@@ -120,11 +120,11 @@ INSERT INTO library_stock(library_id, book_id, book_copies) VALUES
     (4, 5, 1),
     (4, 7, 1);
 
-INSERT INTO checkout(library_id, book_id, user_id, check_out_date, return_date) VALUES
+INSERT INTO checkout(library_id, book_id, user_id, check_out_date, due_date, return_date) VALUES
     --Ada checked out "In Defence of Witches"
-    (1, 2, 1, '2020-09-05', '2020-09-07'),
+    (1, 2, 1, '2020-09-05', '2020-09-19','2020-09-07'),
     --Mary checked out "Scary Smart"
-    (3, 3, 2, '2020-09-08', DEFAULT),
+    (3, 3, 2, '2020-09-08', '2020-09-22', DEFAULT),
     --Jackie checked out "The Lightning Thief" and "To Kill a Mockingbird"
-    (4, 7, 3, '2020-09-10', DEFAULT),
-    (4, 8, 3, '2020-09-11', DEFAULT);
+    (4, 7, 3, '2020-09-10', '2020-09-24', DEFAULT),
+    (4, 8, 3, '2020-09-11', '2020-09-25', DEFAULT);
