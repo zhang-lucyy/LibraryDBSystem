@@ -174,7 +174,23 @@ def delete_account(name):
         DELETE FROM users WHERE users.name = %(name)s""", {'name': name})
 
 '''
-User checks out a book at a given library.
+When books are checked out, they have a pre-assigned maximum lending
+time of 2 weeks.
+Parameter:
+    user_id(int): A user id.
+    book_id(int): A book id.
+'''
+def add_due_date(user_id, book_id):
+    exec_commit("""
+        UPDATE checkout
+        SET due_date = check_out_date +  interval '2 weeks'
+        WHERE user_id = %(user_id)s
+        AND book_id = %(book_id)s""",
+        {'user_id': user_id, 'book_id': book_id})
+
+'''
+User checks out a book at a given library. If a user is overdue on a book,
+no further checkouts will be allowed.
 Parameter:
     library_id(int): A library id.
     book_id(int): A book id.
@@ -182,22 +198,36 @@ Parameter:
     check_out_date(date): The date the book is checked out.
 '''
 def checkout_book(library_id, book_id, user_id, check_out_date):
-    # updates master inventory
-    exec_commit("""
-        UPDATE inventory SET copies = (copies - 1)
-        WHERE book_id = %(book_id)s""", {'book_id': book_id})
+    # check if there's any overdue books, if there are, user cannot make further checkouts
+    overdue = exec_get_all("""
+        SELECT book_id FROM checkout
+        WHERE check_out_date - due_date > 14
+        AND user_id = %(user_id)s""",
+        {'user_id': user_id})
 
-    # updates library inventory
-    exec_commit("""
-        UPDATE library_stock SET book_copies = (book_copies - 1)
-        WHERE book_id = %(book_id)s
-        AND library_stock.library_id = %(library_id)s""",
-        {'book_id': book_id, 'library_id': library_id})
+    if (overdue.__len__() >= 1):
+        print("\n", overdue)
+        raise Exception("Cannot checkout book bc overdue")
 
-    exec_commit("""
-        INSERT INTO checkout (library_id, book_id, user_id, check_out_date)
-        VALUES (%(library_id)s, %(book_id)s, %(user_id)s, %(check_out_date)s)""",
-        {'library_id': library_id, 'book_id': book_id, 'user_id': user_id, 'check_out_date': check_out_date})
+    else:
+        # updates master inventory
+        exec_commit("""
+            UPDATE inventory SET copies = (copies - 1)
+            WHERE book_id = %(book_id)s""", {'book_id': book_id})
+
+        # updates library inventory
+        exec_commit("""
+            UPDATE library_stock SET book_copies = (book_copies - 1)
+            WHERE book_id = %(book_id)s
+            AND library_stock.library_id = %(library_id)s""",
+            {'book_id': book_id, 'library_id': library_id})
+
+        exec_commit("""
+            INSERT INTO checkout (library_id, book_id, user_id, check_out_date)
+            VALUES (%(library_id)s, %(book_id)s, %(user_id)s, %(check_out_date)s)""",
+            {'library_id': library_id, 'book_id': book_id, 'user_id': user_id, 'check_out_date': check_out_date})
+
+        add_due_date(user_id, book_id)
 
 '''
 User returns a book at a given library.
@@ -205,7 +235,7 @@ Parameter:
     library_id(int): A library id.
     book_id(int): A book id.
     user_id(int): A user id.
-    return date(date): The date the book is returned.
+    return_date(date): The date the book is returned.
 '''
 def return_book(library_id, book_id, user_id, return_date):
     # updates master inventory
@@ -220,8 +250,10 @@ def return_book(library_id, book_id, user_id, return_date):
         AND library_stock.library_id = %(library_id)s""",
         {'book_id': book_id, 'library_id': library_id})
     
+    # updates table to show return date & sets previous due date to null
     exec_commit("""
-        UPDATE checkout SET return_date = %(return_date)s
+        UPDATE checkout SET return_date = %(return_date)s,
+        due_date = NULL
         WHERE book_id = %(book_id)s
         AND user_id = %(user_id)s
         AND checkout.library_id = %(library_id)s""",
