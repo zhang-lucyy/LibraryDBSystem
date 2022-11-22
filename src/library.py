@@ -126,16 +126,20 @@ def search_by_title(title):
         WHERE inventory.title = %(title)s""", {'title': title})
 
 '''
-Returns the number of book copies left given the book id.
+Returns the number of book copies at the specified library given
+the library id and book id.
 Parameter:
+    library_id(int): A library id.
     book_id(int): A book's id.
 Returns:
     (int): Number of book copies.
 ''' 
-def get_book_copies(book_id):
+def get_book_copies(library_id, book_id):
     return exec_get_one("""
-        SELECT inventory.copies FROM inventory WHERE inventory.book_id
-        = %(book_id)s""", {'book_id': book_id})
+        SELECT book_copies FROM library_stock 
+        WHERE library_stock.library_id = %(library_id)s
+        AND library_stock.book_id = %(book_id)s""",
+        {'library_id': library_id, 'book_id': book_id})
 
 '''
 Returns the corresponding book id given the book title.
@@ -225,18 +229,19 @@ def return_book(library_id, book_id, user_id, return_date):
 
 '''
 User reserves a book, only reserves successfully if there are no copies
-of the book left in the inventory.
+of the book left at the specified library.
 Parameters:
+    library_id(int): A library id.
     reserve_book_id(int): A book id.
     user_id(int): A user id.
 '''
-def reserve_book(reserve_book_id, user_id):
-    book_copies = get_book_copies(reserve_book_id)
+def reserve_book(library_id, reserve_book_id, user_id):
+    book_copies = get_book_copies(library_id, reserve_book_id)
     if (book_copies[0] == 0):
         exec_commit("""
-            INSERT INTO reserve(reserve_book_id, user_id)
-            VALUES (%(reserve_book_id)s, %(user_id)s)""",
-            {'reserve_book_id': reserve_book_id, 'user_id': user_id})
+            INSERT INTO reserve(library_id, reserve_book_id, user_id)
+            VALUES (%(library_id)s, %(reserve_book_id)s, %(user_id)s)""",
+            {'library_id': library_id, 'reserve_book_id': reserve_book_id, 'user_id': user_id})
     else:
         raise Exception("copies of the book are still available")
 

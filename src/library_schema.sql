@@ -48,8 +48,10 @@ CREATE TABLE checkout(
 );
 
 CREATE TABLE reserve(
+    library_id INTEGER,
     reserve_book_id INTEGER,
     user_id INTEGER,
+    FOREIGN KEY(library_id) REFERENCES libraries(library_id),
     FOREIGN KEY(reserve_book_id) REFERENCES inventory(book_id),
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -91,6 +93,7 @@ INSERT INTO library_stock(library_id, book_id, book_copies) VALUES
     (1, 3, 1),
     (1, 4, 1),
     (1, 5, 2),
+    (1, 6, 0),
     (1, 7, 1),
 
     --Fairport
