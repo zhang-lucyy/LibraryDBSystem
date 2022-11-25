@@ -122,7 +122,7 @@ INSERT INTO library_stock(library_id, book_id, book_copies) VALUES
 
 INSERT INTO checkout(library_id, book_id, user_id, check_out_date, due_date, return_date) VALUES
     --Ada checked out "In Defence of Witches"
-    (1, 2, 1, '2020-09-05', '2020-09-19','2020-09-07'),
+    (1, 2, 1, '2020-09-05', DEFAULT,'2020-09-07'),
     --Mary checked out "Scary Smart"
     (3, 3, 2, '2020-09-08', '2020-09-22', DEFAULT),
     --Jackie checked out "The Lightning Thief" and "To Kill a Mockingbird"
