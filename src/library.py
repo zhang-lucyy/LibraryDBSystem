@@ -299,6 +299,33 @@ def insert_data_from_csv(filename):
                 VALUES (%(title)s, %(book_type)s, %(author)s, NULL, %(summary)s, %(copies)s)""",
                 {'title': title, 'book_type': book_type, 'author': author, 'summary': summary, 'copies': copies})
 
+'''
+Adds a new book to the master inventory.
+Parameters:
+    title(str): Title of a book.
+    book_type(str): Genre of a book.
+    author(str): Author's name.
+    copies(int): Number of copies of the book.
+'''
+def add_new_book(title, book_type, author, copies):
+    exec_commit("""
+        INSERT INTO inventory(title, book_type, author, copies)
+        VALUES (%(title)s, %(book_type)s, %(author)s, %(copies)s)""",
+        {'title': title, 'book_type': book_type, 'author': author, 'copies': copies})
+
+'''
+Adds a new book to the specified library's inventory.
+Parameters:
+    library_id(int): A library's id.
+    book_id(int): A book's id.
+    book_copies(int): Number of copies of the book.
+'''
+def add_to_library(library_id, book_id, book_copies):
+    exec_commit("""
+        INSERT INTO library_stock(library_id, book_id, book_copies)
+        VALUES (%(library_id)s, %(book_id)s, %(book_copies)s)""",
+        {'library_id': library_id, 'book_id': book_id, 'book_copies': book_copies})
+
 def main():
     rebuild_tables()
 
