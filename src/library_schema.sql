@@ -79,8 +79,9 @@ INSERT INTO inventory(title, book_type, author, publish_date, summary, copies) V
     ('To Kill a Mockingbird', 'Fiction', 'Harper Lee', 1960,
         'Chronicles the childhood of Scout and Jem Finch', 1),
     ('Frankenstein', 'Fiction', 'Mary Shelley', 1818,
-        'A young scientist who creates a sapient creature in an scientific experiment', 1);
-
+        'A young scientist who creates a sapient creature in an scientific experiment', 1),
+    ('The Winds of Winter', 'Fiction', 'George R.R. Martin', DEFAULT, DEFAULT, 4);
+    
 INSERT INTO libraries(library_name) VALUES
     ('Penfield'),
     ('Fairport'),
@@ -95,6 +96,7 @@ INSERT INTO library_stock(library_id, book_id, book_copies) VALUES
     (1, 5, 2),
     (1, 6, 0),
     (1, 7, 1),
+    (1, 10, 1),
 
     --Fairport
     (2, 1, 1),
@@ -104,6 +106,7 @@ INSERT INTO library_stock(library_id, book_id, book_copies) VALUES
     (2, 5, 2),
     (2, 7, 1),
     (2, 8, 1),
+    (2, 10, 1),
 
     --Henrietta
     (3, 1, 1),
@@ -112,13 +115,15 @@ INSERT INTO library_stock(library_id, book_id, book_copies) VALUES
     (3, 5, 1),
     (3, 7, 1),
     (3, 8, 1),
+    (3, 10, 1),
 
     --Pittsford
     (4, 1, 1),
     (4, 2, 1),
     (4, 3, 1),
     (4, 5, 1),
-    (4, 7, 1);
+    (4, 7, 1),
+    (4, 10, 1);
 
 INSERT INTO checkout(library_id, book_id, user_id, check_out_date, due_date, return_date) VALUES
     --Ada checked out "In Defence of Witches"
