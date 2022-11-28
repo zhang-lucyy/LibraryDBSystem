@@ -24,7 +24,7 @@ Returns:
     (int): A user's id number in the system.
 '''
 def get_user_id(name):
-    return exec_get_one("SELECT id FROM users WHERE users.name = %(name)s", {'name': name})
+    return exec_get_one("SELECT id FROM users WHERE users.name = %(name)s", {'name': name})[0]
 
 '''
 Returns a user's contact info given their user id.
@@ -151,7 +151,7 @@ Returns:
 def get_book_id(title):
     return exec_get_one("""
         SELECT inventory.book_id FROM inventory WHERE inventory.title
-        = %(title)s""", {'title': title})
+        = %(title)s""", {'title': title})[0]
 
 '''
 Creates a new account with the given name and contact info.
@@ -207,7 +207,7 @@ def checkout_book(library_id, book_id, user_id, check_out_date):
 
     if (overdue.__len__() >= 1):
         print("\n", overdue)
-        raise Exception("Cannot checkout book bc overdue")
+        raise Exception("Cannot checkout book because user has an overdue book")
 
     else:
         # updates master inventory
