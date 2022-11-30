@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 from src.swen344_db_utils import *
 
 def rebuild_tables():
@@ -110,7 +111,7 @@ def search_by_author(author):
     return exec_get_all("""
         SELECT inventory.title, inventory.book_type, inventory.author, 
         inventory.publish_date, inventory.copies FROM inventory 
-        WHERE inventory.author = %(author)s""", {'author': author})
+        WHERE inventory.author = %(author)s""", {'author': author})[0]
 
 '''
 Returns all of the books in the inventory that match the given title.
@@ -199,14 +200,19 @@ Parameter:
 '''
 def checkout_book(library_id, book_id, user_id, check_out_date):
     # check if there's any overdue books, if there are, user cannot make further checkouts
-    overdue = exec_get_all("""
-        SELECT book_id FROM checkout
-        WHERE check_out_date - due_date > 14
-        AND user_id = %(user_id)s""",
+    due_dates = exec_get_all("""
+        SELECT due_date FROM checkout
+        WHERE user_id = %(user_id)s
+        AND due_date IS NOT NULL""",
         {'user_id': user_id})
 
-    if (overdue.__len__() >= 1):
-        print("\n", overdue)
+    overdue = 0
+    for dates in due_dates:
+        if (datetime.strptime(check_out_date, '%Y-%m-%d').date() > dates[0]):
+            overdue += 1
+            break
+    
+    if (overdue == 1):
         raise Exception("Cannot checkout book because user has an overdue book")
 
     else:
@@ -325,6 +331,54 @@ def add_to_library(library_id, book_id, book_copies):
         INSERT INTO library_stock(library_id, book_id, book_copies)
         VALUES (%(library_id)s, %(book_id)s, %(book_copies)s)""",
         {'library_id': library_id, 'book_id': book_id, 'book_copies': book_copies})
+
+'''
+Returns a listing of a user's lending history including their late history.
+Parameter:
+    user_id(int): A user id.
+Returns:
+    (list): A list of the user's lending history.
+'''
+def get_user_history(user_id):
+    return exec_get_all("""
+        SELECT inventory.title, check_out_date, due_date, return_date
+        FROM checkout
+        INNER JOIN inventory ON inventory.book_id = checkout.book_id
+        WHERE user_id = %(user_id)s""",
+        {'user_id': user_id})
+
+'''
+As a librarian, this returns a comprehensive list of all late books and histories
+at the specified library.
+Parameter:
+    library_id(int): A library's id.
+Returns:
+    (list): All checkout histories including late books.
+'''
+def get_all_histories(library_id):
+    #NEEDS TESTING
+    return exec_get_all("""
+        SELECT inventory.title, check_out_date, due_date, return_date
+        FROM checkout
+        INNER JOIN inventory ON inventory.book_id = checkout.book_id
+        WHERE library_id = %(library_id)s""",
+        {'library_id': library_id})
+
+'''
+Runs a report listing all books in all libraries, organized by library location
+and book title with the count of books at each location.
+Returns:
+    (list): A list of all books in all libraries (tuples).
+'''
+def report_on_all_libraries():
+    #NEEDS TESTING
+    return exec_get_all("""
+        SELECT libraries.library_name, inventory.title, book_copies
+        FROM library_stock
+        INNER JOIN inventory ON inventory.book_id = library_stock.book_id
+        INNER JOIN libraries ON libraries.library_id = library_stock.library_id
+        ORDER BY libraries.library_name, inventory.title ASC
+    """)
 
 def main():
     rebuild_tables()
