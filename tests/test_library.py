@@ -180,8 +180,8 @@ class TestLibrary(unittest.TestCase):
         book_id = get_book_id('The Winds of Winter')
         checkout_book(library_id, book_id, user_id, '2022-01-02')
 
-        actual = return_book(library_id, book_id, user_id, '2022-01-10')
         expected = (2, book_id, user_id, date(2022, 1, 2), None, date(2022, 1, 10))
+        actual = return_book(library_id, book_id, user_id, '2022-01-10')
 
         self.assertEqual(expected, actual, 'Mary should have checked out on Jan. 2nd')
         print('\nMary checks out "The Winds of Winter" on Jan. 2nd and returns it in 8 days')
@@ -211,17 +211,16 @@ class TestLibrary(unittest.TestCase):
         book_id = get_book_id('The Winds of Winter')
         checkout_book(2, book_id, user_id, '2022-03-01')
 
-        actual = return_book(2, book_id, user_id, '2022-03-31')
         expected = (2, book_id, user_id, date(2022, 3, 1), None, date(2022, 3, 31))
+        actual = return_book(2, book_id, user_id, '2022-03-31')
 
         self.assertEqual(expected, actual, 'Jackie should have checked out on March 1st')
         print('\nJackie checks out "The Winds of Winter" on March 1st and returns it in 30 days')
 
         # Fairport report
         report = get_all_histories(library_id)
-
         self.assertEqual(3, report.__len__(), 'Fairport report is incorrect')
-        print('\nThe Fairport Librarian runs a report', report)
+        print('\nThe Fairport Librarian runs a report:', report)
 
     def test_donate_to_fairport(self):
         library_id = 2
@@ -261,6 +260,6 @@ class TestLibrary(unittest.TestCase):
         print('\nAnother good samaritan donates 2 copies of "The Wines of Winter" to Pittsford and Henrietta')
 
     def test_county_report(self):
-        print('The county librarian runs a report listing all books in all libraries')
+        print('\nThe county librarian runs a report listing all books in all libraries:')
         report = report_on_all_libraries()
         self.assertEqual(28, report.__len__(), 'incorrect total books')
