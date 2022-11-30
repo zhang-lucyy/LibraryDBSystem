@@ -177,13 +177,13 @@ class TestLibrary(unittest.TestCase):
         print('\nCheckout works correctly, book has pre-assigned due date')
 
     # test case sketches db3
-    # good
     def test_mary_checks_out(self):
         # @ Fairport
+        library_id = 2
         user_id = get_user_id('Mary Shelley')
         book_id = get_book_id('The Winds of Winter')
-        checkout_book(2, book_id, user_id, '2022-01-02')
-        return_book(2, book_id, user_id, '2022-01-10')
+        checkout_book(library_id, book_id, user_id, '2022-01-02')
+        return_book(library_id, book_id, user_id, '2022-01-10')
 
         expected = (2, book_id, user_id, date(2022, 1, 2), None, date(2022, 1, 10))
         actual = exec_get_all("""
@@ -196,17 +196,29 @@ class TestLibrary(unittest.TestCase):
         print('\nMary checks out "The Winds of Winter" on Jan. 2nd and returns it in 8 days')
 
     def test_ada_checks_out(self):
+        library_id = 2
         user_id = get_user_id('Ada Lovelace')
         book_id = get_book_id('The Winds of Winter')
-        checkout_book(2, book_id, user_id, '2022-01-13')
+        checkout_book(library_id, book_id, user_id, '2022-01-13')
 
+        # tries to check out another book 15 days after
         with self.assertRaises(Exception) as cannot_checkout:
-            checkout_book(2, get_book_id('The Lightning Thief'), user_id, '2022-01-28')
+            checkout_book(library_id, get_book_id('The Lightning Thief'), user_id, '2022-01-28')
             self.assertTrue('User has a overdue book - no further checkouts will be allowed' in cannot_checkout.exception)
         self.assertEqual(2, get_user_history(user_id).__len__(), 'Ada should only have 2 books in his history')
-        print('\nAda tries to check out another book 15 days after checking out "The Winds of Winter" but her request is rejected')
+        print('\nAda tries to check out another book 15 days after checking out "The Winds of Winter" but her request is rejected due to overdue book')
 
-    # good
+        return_book(library_id, book_id, user_id, '2022-01-31')
+        expected = (library_id, book_id, user_id, date(2022, 1, 13), None, date(2022, 1, 31))
+        actual = exec_get_all("""
+            SELECT * FROM checkout
+            WHERE user_id = %(user_id)s
+            AND book_id = %(book_id)s""",
+            {'user_id': user_id, 'book_id': book_id})[0]
+
+        self.assertEqual(expected, actual, 'Ada should have checked out on Jan. 13th')
+        print('\nAda checks out "The Winds of Winter" on Jan. 13th and returns it in 18 days')
+
     def test_jackie_checks_out(self):
         user_id = get_user_id('Jackie Gleason')
         book_id = get_book_id('The Winds of Winter')
@@ -223,7 +235,6 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(expected, actual, 'Jackie should have checked out on March 1st')
         print('\nJackie checks out "The Winds of Winter" on March 1st and returns it in 30 days')
 
-    # good
     def test_get_user_history(self):
         user_id = get_user_id('Jackie Gleason')
 
