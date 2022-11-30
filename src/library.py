@@ -431,8 +431,7 @@ Returns:
     (list): A list of all books in all libraries (tuples).
 '''
 def report_on_all_libraries():
-    #NEEDS TESTING
-    return exec_get_all("""
+    books = exec_get_all("""
         SELECT libraries.library_name, inventory.title
         FROM library_stock
         INNER JOIN inventory ON inventory.book_id = library_stock.book_id
@@ -440,9 +439,37 @@ def report_on_all_libraries():
         ORDER BY libraries.library_name, inventory.title ASC
     """)
 
+    for book in books:
+        print(book)
+
+    print('Number of books at each location:')
+    print('Fairport:', total_books_at_library(2))
+    print('Henrietta:', total_books_at_library(3))
+    print('Penfield:', total_books_at_library(1))
+    print('Pittsford:', total_books_at_library(4))
+
+    return books
+
+'''
+Calculates the total number of books at a specified library,
+adding up all the copies of each book there.
+Parameter:
+    library_id(int): A library's id.
+Returns:
+    (int): Total number of books at this library.
+'''
 def total_books_at_library(library_id):
     count = 0
-    books = exec_get_all()
+    copies = exec_get_all("""
+        SELECT book_copies
+        FROM library_stock
+        WHERE library_id = %(library_id)s""",
+        {'library_id': library_id})
+
+    for copy in copies:
+        count += copy[0]
+
+    return count
 
 def main():
     rebuild_tables()
