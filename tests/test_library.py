@@ -260,4 +260,7 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(2, actual.__len__(), 'Pittsford and Henrietta should each have 1 copy')
         print('\nAnother good samaritan donates 2 copies of "The Wines of Winter" to Pittsford and Henrietta')
 
-    
+    def test_county_report(self):
+        print('The county librarian runs a report listing all books in all libraries')
+        report = report_on_all_libraries()
+        self.assertEqual(28, report.__len__(), 'incorrect total books')
