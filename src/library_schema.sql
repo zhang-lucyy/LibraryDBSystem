@@ -81,7 +81,7 @@ INSERT INTO inventory(title, book_type, author, publish_date, summary, copies) V
     ('Frankenstein', 'Fiction', 'Mary Shelley', 1818,
         'A young scientist who creates a sapient creature in an scientific experiment', 1),
     ('The Winds of Winter', 'Fiction', 'George R.R. Martin', DEFAULT, DEFAULT, 4);
-    
+
 INSERT INTO libraries(library_name) VALUES
     ('Penfield'),
     ('Fairport'),
@@ -129,7 +129,7 @@ INSERT INTO checkout(library_id, book_id, user_id, check_out_date, due_date, ret
     --Ada checked out "In Defence of Witches"
     (1, 2, 1, '2020-09-05', DEFAULT,'2020-09-07'),
     --Mary checked out "Scary Smart"
-    (3, 3, 2, '2020-09-08', '2020-09-22', DEFAULT),
+    (3, 3, 2, '2020-09-08', DEFAULT, '2020-09-15'),
     --Jackie checked out "The Lightning Thief" and "To Kill a Mockingbird"
-    (4, 7, 3, '2020-09-10', '2020-09-24', DEFAULT),
-    (4, 8, 3, '2020-09-11', '2020-09-25', DEFAULT);
+    (4, 7, 3, '2020-09-10', DEFAULT, '2020-09-20'),
+    (4, 8, 3, '2020-09-11', DEFAULT, '2020-09-24');
