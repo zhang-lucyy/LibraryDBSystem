@@ -147,12 +147,17 @@ Returns the corresponding book id given the book title.
 Parameter:
     title(str): A book title.
 Returns:
-    (int): A book's id.
+    (int): A book's id - 0 if book does not exist in inventory.
 '''
 def get_book_id(title):
-    return exec_get_one("""
+    sql = exec_get_one("""
         SELECT inventory.book_id FROM inventory WHERE inventory.title
-        = %(title)s""", {'title': title})[0]
+        = %(title)s""", {'title': title})
+    
+    if(sql != None):
+        return sql[0]
+    else:
+        return 0
 
 '''
 Creates a new account with the given name and contact info.
@@ -197,6 +202,8 @@ Parameter:
     book_id(int): A book id.
     user_id(int): A user id.
     check_out_date(date): The date the book is checked out.
+Returns:
+    (tuple): Info regarding the checkout - date checked out, due date etc
 '''
 def checkout_book(library_id, book_id, user_id, check_out_date):
     # check if there's any overdue books, if there are, user cannot make further checkouts
@@ -216,12 +223,12 @@ def checkout_book(library_id, book_id, user_id, check_out_date):
         raise Exception("Cannot checkout book because user has an overdue book")
 
     else:
-        # updates master inventory
+        # updates master inventory count
         exec_commit("""
             UPDATE inventory SET copies = (copies - 1)
             WHERE book_id = %(book_id)s""", {'book_id': book_id})
 
-        # updates library inventory
+        # updates library inventory count
         exec_commit("""
             UPDATE library_stock SET book_copies = (book_copies - 1)
             WHERE book_id = %(book_id)s
@@ -233,7 +240,17 @@ def checkout_book(library_id, book_id, user_id, check_out_date):
             VALUES (%(library_id)s, %(book_id)s, %(user_id)s, %(check_out_date)s)""",
             {'library_id': library_id, 'book_id': book_id, 'user_id': user_id, 'check_out_date': check_out_date})
 
+        # add maximum lending time of 2 weeks
         add_due_date(user_id, book_id)
+
+        # return
+        sql = exec_get_all("""
+            SELECT * FROM checkout
+            WHERE user_id = %(user_id)s
+            AND book_id = %(book_id)s""",
+            {'user_id': user_id, 'book_id': book_id})[0]
+
+        return sql
 
 '''
 User returns a book at a given library.
@@ -242,6 +259,8 @@ Parameter:
     book_id(int): A book id.
     user_id(int): A user id.
     return_date(date): The date the book is returned.
+Returns:
+    (tuple): The full checkout history - date checked out, date returned etc
 '''
 def return_book(library_id, book_id, user_id, return_date):
     # updates master inventory
@@ -264,6 +283,15 @@ def return_book(library_id, book_id, user_id, return_date):
         AND user_id = %(user_id)s
         AND checkout.library_id = %(library_id)s""",
         {'return_date': return_date, 'book_id': book_id, 'user_id': user_id, 'library_id': library_id})
+
+    # return
+    sql = exec_get_all("""
+            SELECT * FROM checkout
+            WHERE user_id = %(user_id)s
+            AND book_id = %(book_id)s""",
+            {'user_id': user_id, 'book_id': book_id})[0]
+
+    return sql
 
 '''
 User reserves a book, only reserves successfully if there are no copies
@@ -306,31 +334,62 @@ def insert_data_from_csv(filename):
                 {'title': title, 'book_type': book_type, 'author': author, 'summary': summary, 'copies': copies})
 
 '''
-Adds a new book to the master inventory.
+Checks to see if the book already exists in the inventory. If there is, simply
+updates the number of copies in the inventory. If not, it adds the new book.
 Parameters:
     title(str): Title of a book.
     book_type(str): Genre of a book.
     author(str): Author's name.
     copies(int): Number of copies of the book.
+Returns:
+    (int): Newly added book_id if it is not already in the inventory.
 '''
-def add_new_book(title, book_type, author, copies):
-    exec_commit("""
-        INSERT INTO inventory(title, book_type, author, copies)
-        VALUES (%(title)s, %(book_type)s, %(author)s, %(copies)s)""",
-        {'title': title, 'book_type': book_type, 'author': author, 'copies': copies})
+def add_new_book(title, book_type, author, add_copies):
+    # first check to see if the same book already exists in inventory
+    book_id = get_book_id(title)
+
+    # if there is, just update the number of copies
+    if(book_id != 0):
+            sql = f"""
+            UPDATE inventory SET copies = (copies + {add_copies})
+            WHERE book_id = {book_id}"""
+            exec_commit(sql)
+
+    # if not, just add the new book to the inventory
+    else:
+        exec_commit("""
+            INSERT INTO inventory(title, book_type, author, copies)
+            VALUES (%(title)s, %(book_type)s, %(author)s, %(add_copies)s)""",
+            {'title': title, 'book_type': book_type, 'author': author, 'add_copies': add_copies})
+
+    return get_book_id(title)
 
 '''
-Adds a new book to the specified library's inventory.
+Adds a new book to the specified library's inventory if it is not alrady there,
+otherwise it updates the book count with the given additional copies.
 Parameters:
     library_id(int): A library's id.
     book_id(int): A book's id.
     book_copies(int): Number of copies of the book.
 '''
 def add_to_library(library_id, book_id, book_copies):
-    exec_commit("""
-        INSERT INTO library_stock(library_id, book_id, book_copies)
-        VALUES (%(library_id)s, %(book_id)s, %(book_copies)s)""",
-        {'library_id': library_id, 'book_id': book_id, 'book_copies': book_copies})
+    # first check to see if the book already exists in the library's system
+    copies = get_book_copies(library_id, book_id)
+
+    # if there is, just update the number of copies
+    if(copies != None):
+            sql = f"""
+            UPDATE library_stock SET book_copies = (book_copies + {book_copies})
+            WHERE book_id = {book_id}
+            AND library_id = {library_id}"""
+            exec_commit(sql)
+    
+    # if not, add it into the system
+    else:
+        exec_commit("""
+            INSERT INTO library_stock(library_id, book_id, book_copies)
+            VALUES (%(library_id)s, %(book_id)s, %(book_copies)s)""",
+            {'library_id': library_id, 'book_id': book_id, 'book_copies': book_copies})
 
 '''
 Returns a listing of a user's lending history including their late history.
@@ -358,9 +417,10 @@ Returns:
 def get_all_histories(library_id):
     #NEEDS TESTING
     return exec_get_all("""
-        SELECT inventory.title, check_out_date, due_date, return_date
+        SELECT inventory.title, users.name, check_out_date, due_date, return_date
         FROM checkout
         INNER JOIN inventory ON inventory.book_id = checkout.book_id
+        INNER JOIN users ON users.id = checkout.user_id
         WHERE library_id = %(library_id)s""",
         {'library_id': library_id})
 
@@ -373,12 +433,16 @@ Returns:
 def report_on_all_libraries():
     #NEEDS TESTING
     return exec_get_all("""
-        SELECT libraries.library_name, inventory.title, book_copies
+        SELECT libraries.library_name, inventory.title
         FROM library_stock
         INNER JOIN inventory ON inventory.book_id = library_stock.book_id
         INNER JOIN libraries ON libraries.library_id = library_stock.library_id
         ORDER BY libraries.library_name, inventory.title ASC
     """)
+
+def total_books_at_library(library_id):
+    count = 0
+    books = exec_get_all()
 
 def main():
     rebuild_tables()

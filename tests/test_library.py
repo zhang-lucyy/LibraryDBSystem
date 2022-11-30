@@ -32,7 +32,7 @@ class TestLibrary(unittest.TestCase):
         print('\nLibraries:', actual)
 
     def test_verify_checkout_rows(self):
-        expected = 7
+        expected = 5
         actual = get_checked_out_books().__len__()
         
         self.assertEqual(expected, actual, 'incorrect count of rows for checkout table')
@@ -68,7 +68,7 @@ class TestLibrary(unittest.TestCase):
         print('\nAll non-fiction books:', actual)
 
     def test_get_fiction_books(self):
-        expected = 6
+        expected = 7
         actual = get_fiction_books()
         
         self.assertEqual(expected, actual.__len__(), 'not all expected fiction books are listed')
@@ -124,12 +124,9 @@ class TestLibrary(unittest.TestCase):
         user_id = get_user_id('Art Garfunkel')
         book_id = get_book_id('Frankenstein')
         checkout_book(1, book_id, user_id, '2020-09-10')
-        return_book(1, book_id, user_id, '2020-09-13')
 
-        expected = [(1, 9, 4, date(2020, 9, 10), None, date(2020, 9, 13))]
-        actual = exec_get_all("""
-            SELECT * FROM checkout WHERE user_id = %(user_id)s""",
-            {'user_id': user_id})
+        expected = (1, 9, 4, date(2020, 9, 10), None, date(2020, 9, 13))
+        actual = return_book(1, book_id, user_id, '2020-09-13')
 
         self.assertEqual(expected, actual, 'Art did not return the book')
         print('\nArt Garfunkel returns a copy of “Frankenstein” three days after he borrowed it')
@@ -148,7 +145,7 @@ class TestLibrary(unittest.TestCase):
         print('\nMary Shelley deletes her account after finding no copies of "The Last Man" in the library')
 
     def test_get_checked_out_books(self):
-        expected = 4
+        expected = 6
         actual = get_checked_out_books()
 
         self.assertEqual(expected, actual.__len__(), 'not all checked out books are listed')
@@ -165,38 +162,32 @@ class TestLibrary(unittest.TestCase):
     def test_checkout_has_due_date(self):
         user_id = 2
         book_id = 1
-        checkout_book(3,book_id,user_id,'2020-09-10')
 
-        expected = [(3, 1, 2, date(2020, 9, 10), date(2020, 9, 24), None)]
-        actual = exec_get_all("""
-            SELECT * FROM checkout WHERE user_id = %(user_id)s
-            AND book_id = %(book_id)s""",
-            {'user_id': user_id, 'book_id': book_id})
+        expected = (3, 1, 2, date(2020, 9, 10), date(2020, 9, 24), None)
+        actual = checkout_book(3, book_id, user_id, '2020-09-10')
 
         self.assertEqual(expected, actual, 'Pre-assigned due date is not correct')
         print('\nCheckout works correctly, book has pre-assigned due date')
 
     # test case sketches db3
-    def test_mary_checks_out(self):
-        # @ Fairport
+    def test_fairport_checkouts(self):
         library_id = 2
+
+        # Mary's account was previously deleted in db2 test case, so create a new one
+        create_account('Mary Shelley', 'MShelley@gmail.com')
+        # Mary checks out
         user_id = get_user_id('Mary Shelley')
         book_id = get_book_id('The Winds of Winter')
         checkout_book(library_id, book_id, user_id, '2022-01-02')
-        return_book(library_id, book_id, user_id, '2022-01-10')
 
+        actual = return_book(library_id, book_id, user_id, '2022-01-10')
         expected = (2, book_id, user_id, date(2022, 1, 2), None, date(2022, 1, 10))
-        actual = exec_get_all("""
-            SELECT * FROM checkout
-            WHERE user_id = %(user_id)s
-            AND book_id = %(book_id)s""",
-            {'user_id': user_id, 'book_id': book_id})[0]
 
         self.assertEqual(expected, actual, 'Mary should have checked out on Jan. 2nd')
         print('\nMary checks out "The Winds of Winter" on Jan. 2nd and returns it in 8 days')
 
-    def test_ada_checks_out(self):
-        library_id = 2
+
+        # Ada checks out
         user_id = get_user_id('Ada Lovelace')
         book_id = get_book_id('The Winds of Winter')
         checkout_book(library_id, book_id, user_id, '2022-01-13')
@@ -208,38 +199,65 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(2, get_user_history(user_id).__len__(), 'Ada should only have 2 books in his history')
         print('\nAda tries to check out another book 15 days after checking out "The Winds of Winter" but her request is rejected due to overdue book')
 
-        return_book(library_id, book_id, user_id, '2022-01-31')
         expected = (library_id, book_id, user_id, date(2022, 1, 13), None, date(2022, 1, 31))
-        actual = exec_get_all("""
-            SELECT * FROM checkout
-            WHERE user_id = %(user_id)s
-            AND book_id = %(book_id)s""",
-            {'user_id': user_id, 'book_id': book_id})[0]
+        actual = return_book(library_id, book_id, user_id, '2022-01-31')
 
         self.assertEqual(expected, actual, 'Ada should have checked out on Jan. 13th')
         print('\nAda checks out "The Winds of Winter" on Jan. 13th and returns it in 18 days')
 
-    def test_jackie_checks_out(self):
+
+        # Jackie checks out
         user_id = get_user_id('Jackie Gleason')
         book_id = get_book_id('The Winds of Winter')
         checkout_book(2, book_id, user_id, '2022-03-01')
-        return_book(2, book_id, user_id, '2022-03-31')
 
+        actual = return_book(2, book_id, user_id, '2022-03-31')
         expected = (2, book_id, user_id, date(2022, 3, 1), None, date(2022, 3, 31))
-        actual = exec_get_all("""
-            SELECT * FROM checkout
-            WHERE user_id = %(user_id)s
-            AND book_id = %(book_id)s""",
-            {'user_id': user_id, 'book_id': book_id})[0]
 
         self.assertEqual(expected, actual, 'Jackie should have checked out on March 1st')
         print('\nJackie checks out "The Winds of Winter" on March 1st and returns it in 30 days')
 
-    def test_get_user_history(self):
-        user_id = get_user_id('Jackie Gleason')
+        # Fairport report
+        report = get_all_histories(library_id)
 
-        expected = 2
-        actual = get_user_history(user_id)
+        self.assertEqual(3, report.__len__(), 'Fairport report is incorrect')
+        print('\nThe Fairport Librarian runs a report', report)
 
-        self.assertEqual(expected, actual.__len__(), 'user history is incorrect')
-        print("\nJackie's history:", actual)
+    def test_donate_to_fairport(self):
+        library_id = 2
+        title = 'The Winds of Winter'
+        book_type = 'Fiction'
+        author = 'George R.R. Martin'
+        copies = 3
+        book_id = add_new_book(title, book_type, author, copies)
+        add_to_library(library_id, book_id, copies)
+
+        expected = exec_get_one("""
+            SELECT book_copies FROM library_stock
+            WHERE library_id = %(library_id)s
+            AND book_id = %(book_id)s""",
+            {'library_id': library_id, 'book_id': book_id})[0]
+
+        self.assertEqual(4, expected, 'Fairport should be 4 copies in total')
+        print('\nA good samaritan donates 3 additional copies of the "The Winds of Winter" to Fairport')
+
+    def test_donate_to_pittsford_henrietta(self):
+        title = 'The Wines of Winter'
+        book_type = 'Fiction'
+        author = 'WineExpress'
+        copies = 2
+
+        book_id = add_new_book(title, book_type, author, copies)
+
+        add_to_library(3, book_id, 1)
+        add_to_library(4, book_id, 1)
+
+        actual = exec_get_all("""
+            SELECT * FROM library_stock
+            WHERE book_id = %(book_id)s""",
+            {'book_id': book_id})
+
+        self.assertEqual(2, actual.__len__(), 'Pittsford and Henrietta should each have 1 copy')
+        print('\nAnother good samaritan donates 2 copies of "The Wines of Winter" to Pittsford and Henrietta')
+
+    
