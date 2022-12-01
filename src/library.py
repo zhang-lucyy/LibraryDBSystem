@@ -276,7 +276,11 @@ def return_book(library_id, book_id, user_id, return_date):
         AND library_stock.library_id = %(library_id)s""",
         {'book_id': book_id, 'library_id': library_id})
     
-    apply_late_fees(user_id, book_id, return_date)
+    # calculate any late fees
+    days_late, fee = apply_late_fees(user_id, book_id, return_date)
+    if(fee > 0.0):
+        print('\nYou returned your book', int(days_late), 'days late. You have a late fee of $', fee)
+
     # updates table to show return date & sets previous due date to null
     exec_commit("""
         UPDATE checkout SET return_date = %(return_date)s,
@@ -509,8 +513,36 @@ def apply_late_fees(user_id, book_id, return_date):
             WHERE user_id = {user_id}
             AND book_id = {book_id}"""
         exec_commit(sql)
-
+        
         return days_late, fee
+
+    return 0, fee
+
+'''
+Presents a table listing of each book and who has checked it out.
+'''
+def checkout_table():
+    books = exec_get_all("""
+        SELECT inventory.title, inventory.author, users.name,
+        check_out_date, return_date, late_fees
+        FROM checkout
+        INNER JOIN users ON users.id = checkout.user_id
+        INNER JOIN inventory ON inventory.book_id = checkout.book_id
+    """)
+
+    output = '%-45s  %-18s  %-15s  %-15s  %-10s' % ('book', 'name', 'check_out_date', 'returned_date', 'late_fees')
+    print(output)
+    print('-' * 110)
+
+    for book in books:
+        title_author = book[0] + ' by ' + book[1]
+        name = book[2]
+        checkout_date = book[3]
+        return_date = book[4]
+        late_fees = book[5]
+
+        output = '%-45s  %-18s  %-15s  %-15s  %8s' % (title_author, name, checkout_date, return_date, late_fees)
+        print(output)
 
 '''
 Generates a report that lists each book that has been checked out,
@@ -533,17 +565,17 @@ def generate_report():
     for book in books:
         title = book[0]
         name = book[1]
-        checkout_day = book[2]
+        checkout_date = book[2]
         return_date = book[3]
 
         if (return_date != None):
-            days_borrowed = return_date - checkout_day
+            days_borrowed = return_date - checkout_date
             days_borrowed = int(str(days_borrowed).split(' ')[0])
             average += days_borrowed
         else:
             days_borrowed = None
 
-        output = '%-25s  %-20s  %-15s  %-15s  %-10s' % (title, name, checkout_day, return_date, days_borrowed)
+        output = '%-25s  %-20s  %-15s  %-15s  %-10s' % (title, name, checkout_date, return_date, days_borrowed)
         print(output)
 
     average = average / books.__len__()

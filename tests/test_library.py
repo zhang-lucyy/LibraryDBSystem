@@ -144,13 +144,6 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(expected, actual, "Mary Shelley's account should be deleted")
         print('\nMary Shelley deletes her account after finding no copies of "The Last Man" in the library')
 
-    def test_get_checked_out_books(self):
-        expected = 6
-        actual = get_checked_out_books()
-
-        self.assertEqual(expected, actual.__len__(), 'not all checked out books are listed')
-        print('\nThe librarian gets a list of all books checked out:', actual)
-
     def test_insert_data_from_csv(self):
         insert_data_from_csv('src/Library.csv')
         expected = 29   # 20 from csv + 9 from schema insert
@@ -220,7 +213,15 @@ class TestLibrary(unittest.TestCase):
         # Fairport report
         report = get_all_histories(library_id)
         self.assertEqual(3, report.__len__(), 'Fairport report is incorrect')
-        print('\nThe Fairport Librarian runs a report:', report)
+        print('\nThe Fairport Librarian runs a report:\n', report)
+
+        #db4 1st output
+        print('\nPrinting book checkout table...')
+        checkout_table()
+
+        #db4 2nd output
+        print('\nGenerating a report...')
+        generate_report()
 
     def test_donate_to_fairport(self):
         library_id = 2
