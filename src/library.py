@@ -167,8 +167,8 @@ Parameters:
 '''
 def create_account(name, contact_info):
     exec_commit("""
-        INSERT INTO users (name, contact_info) VALUES (%(name)s, %(contact_info)s)
-        """, {'name': name, 'contact_info': contact_info})
+        INSERT INTO users (name, contact_info) VALUES (%(name)s, %(contact_info)s)""",
+        {'name': name, 'contact_info': contact_info})
 
 '''
 Deletes a user's account given their name.
@@ -276,6 +276,7 @@ def return_book(library_id, book_id, user_id, return_date):
         {'book_id': book_id, 'library_id': library_id})
     
     # updates table to show return date & sets previous due date to null
+    apply_late_fees(user_id, book_id, return_date)
     exec_commit("""
         UPDATE checkout SET return_date = %(return_date)s,
         due_date = NULL
@@ -470,6 +471,43 @@ def total_books_at_library(library_id):
         count += copy[0]
 
     return count
+
+'''
+Calculates the late-fee charge if a book is past due.
+$0.25 for the first week, and $2.00 per day after that.
+Parameters:
+
+Returns:
+'''
+def apply_late_fees(user_id, book_id, return_date):
+    fee = 0.0
+    due_date = exec_get_one("""
+        SELECT due_date
+        FROM checkout
+        WHERE user_id = %(user_id)s
+        AND book_id = %(book_id)s""",
+        {'user_id': user_id, 'book_id': book_id})[0]
+    
+    if (datetime.strptime(return_date, '%Y-%m-%d').date() > due_date):
+        days_late = datetime.strptime(return_date, '%Y-%m-%d').date() - due_date
+        days_late = float(str(days_late).split(' ')[0])
+        #print('days late:', days_late)
+        
+        if (days_late <= 6):
+            fee = days_late * 0.25
+        else:
+            fee = 6 * 0.25
+            fee += 2*(days_late - 6)
+    
+        sql = f"""
+            UPDATE checkout
+            SET late_fees = {fee}
+            WHERE user_id = {user_id}
+            AND book_id = {book_id}"""
+        
+        exec_commit(sql)
+
+    return fee
 
 def main():
     rebuild_tables()
