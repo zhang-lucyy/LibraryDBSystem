@@ -42,6 +42,7 @@ CREATE TABLE checkout(
     check_out_date DATE,
     due_date DATE DEFAULT NULL,
     return_date DATE DEFAULT NULL,
+    late_fees DECIMAL DEFAULT 0.0,
     FOREIGN KEY(library_id) REFERENCES libraries(library_id),
     FOREIGN KEY(book_id) REFERENCES inventory(book_id),
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
