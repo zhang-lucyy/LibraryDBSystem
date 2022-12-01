@@ -125,14 +125,14 @@ class TestLibrary(unittest.TestCase):
         book_id = get_book_id('Frankenstein')
         checkout_book(1, book_id, user_id, '2020-09-10')
 
-        expected = (1, 9, 4, date(2020, 9, 10), None, date(2020, 9, 13))
+        expected = (1, 9, 4, date(2020, 9, 10), None, date(2020, 9, 13), 0.0)
         actual = return_book(1, book_id, user_id, '2020-09-13')
 
         self.assertEqual(expected, actual, 'Art did not return the book')
         print('\nArt Garfunkel returns a copy of “Frankenstein” three days after he borrowed it')
 
     def test_delete_account(self):
-        return_book(3, 3, 2, '2020-09-10')
+        #return_book(3, 3, 2, '2020-09-10')
         delete_account('Mary Shelley')
 
         expected = []
@@ -163,7 +163,7 @@ class TestLibrary(unittest.TestCase):
         user_id = 2
         book_id = 1
 
-        expected = (3, 1, 2, date(2020, 9, 10), date(2020, 9, 24), None)
+        expected = (3, 1, 2, date(2020, 9, 10), date(2020, 9, 24), None, 0.0)
         actual = checkout_book(3, book_id, user_id, '2020-09-10')
 
         self.assertEqual(expected, actual, 'Pre-assigned due date is not correct')
@@ -180,7 +180,7 @@ class TestLibrary(unittest.TestCase):
         book_id = get_book_id('The Winds of Winter')
         checkout_book(library_id, book_id, user_id, '2022-01-02')
 
-        expected = (2, book_id, user_id, date(2022, 1, 2), None, date(2022, 1, 10))
+        expected = (2, book_id, user_id, date(2022, 1, 2), None, date(2022, 1, 10), 0.0)
         actual = return_book(library_id, book_id, user_id, '2022-01-10')
 
         self.assertEqual(expected, actual, 'Mary should have checked out on Jan. 2nd')
@@ -199,7 +199,7 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(2, get_user_history(user_id).__len__(), 'Ada should only have 2 books in his history')
         print('\nAda tries to check out another book 15 days after checking out "The Winds of Winter" but her request is rejected due to overdue book')
 
-        expected = (library_id, book_id, user_id, date(2022, 1, 13), None, date(2022, 1, 31))
+        expected = (library_id, book_id, user_id, date(2022, 1, 13), None, date(2022, 1, 31), 1.0)
         actual = return_book(library_id, book_id, user_id, '2022-01-31')
 
         self.assertEqual(expected, actual, 'Ada should have checked out on Jan. 13th')
@@ -211,7 +211,7 @@ class TestLibrary(unittest.TestCase):
         book_id = get_book_id('The Winds of Winter')
         checkout_book(2, book_id, user_id, '2022-03-01')
 
-        expected = (2, book_id, user_id, date(2022, 3, 1), None, date(2022, 3, 31))
+        expected = (2, book_id, user_id, date(2022, 3, 1), None, date(2022, 3, 31), 21.5)
         actual = return_book(2, book_id, user_id, '2022-03-31')
 
         self.assertEqual(expected, actual, 'Jackie should have checked out on March 1st')
