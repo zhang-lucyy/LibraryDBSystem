@@ -480,6 +480,9 @@ Parameters:
     user_id(int): A user's id.
     book_id(int): A book id.
     return_date(str): Date the book is returned.
+Returns:
+    (int): Number of days late.
+    (float): Late fee.
 '''
 def apply_late_fees(user_id, book_id, return_date):
     fee = 0.0
@@ -505,8 +508,46 @@ def apply_late_fees(user_id, book_id, return_date):
             SET late_fees = {fee}
             WHERE user_id = {user_id}
             AND book_id = {book_id}"""
-        
         exec_commit(sql)
+
+        return days_late, fee
+
+'''
+Generates a report that lists each book that has been checked out,
+the number of days for which it was checked out, and lastly prints
+the average number of days it takes for a book to be returns.
+'''
+def generate_report():
+    average = 0
+
+    books = exec_get_all("""
+        SELECT inventory.title, users.name, check_out_date, return_date
+        FROM checkout
+        INNER JOIN users ON users.id = checkout.user_id
+        INNER JOIN inventory ON inventory.book_id = checkout.book_id
+    """)
+
+    output = '%-25s  %-20s  %-15s  %-15s  %-10s' % ('Title', 'User', 'Checkout', 'Return', 'Days borrowed')
+    print(output)
+
+    for book in books:
+        title = book[0]
+        name = book[1]
+        checkout_day = book[2]
+        return_date = book[3]
+
+        if (return_date != None):
+            days_borrowed = return_date - checkout_day
+            days_borrowed = int(str(days_borrowed).split(' ')[0])
+            average += days_borrowed
+        else:
+            days_borrowed = None
+
+        output = '%-25s  %-20s  %-15s  %-15s  %-10s' % (title, name, checkout_day, return_date, days_borrowed)
+        print(output)
+
+    average = average / books.__len__()
+    print('\nAverage return time = ', round(average, 2), 'days')
 
 def main():
     rebuild_tables()
