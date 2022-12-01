@@ -201,7 +201,7 @@ Parameter:
     library_id(int): A library id.
     book_id(int): A book id.
     user_id(int): A user id.
-    check_out_date(date): The date the book is checked out.
+    check_out_date(str): The date the book is checked out.
 Returns:
     (tuple): Info regarding the checkout - date checked out, due date etc
 '''
@@ -253,12 +253,13 @@ def checkout_book(library_id, book_id, user_id, check_out_date):
         return sql
 
 '''
-User returns a book at a given library.
+User returns a book at a given library. Also calculates the late
+fees if the book was overdue.
 Parameter:
     library_id(int): A library id.
     book_id(int): A book id.
     user_id(int): A user id.
-    return_date(date): The date the book is returned.
+    return_date(str): The date the book is returned.
 Returns:
     (tuple): The full checkout history - date checked out, date returned etc
 '''
@@ -275,8 +276,8 @@ def return_book(library_id, book_id, user_id, return_date):
         AND library_stock.library_id = %(library_id)s""",
         {'book_id': book_id, 'library_id': library_id})
     
-    # updates table to show return date & sets previous due date to null
     apply_late_fees(user_id, book_id, return_date)
+    # updates table to show return date & sets previous due date to null
     exec_commit("""
         UPDATE checkout SET return_date = %(return_date)s,
         due_date = NULL
@@ -476,8 +477,9 @@ def total_books_at_library(library_id):
 Calculates the late-fee charge if a book is past due.
 $0.25 for the first week, and $2.00 per day after that.
 Parameters:
-
-Returns:
+    user_id(int): A user's id.
+    book_id(int): A book id.
+    return_date(str): Date the book is returned.
 '''
 def apply_late_fees(user_id, book_id, return_date):
     fee = 0.0
@@ -491,7 +493,6 @@ def apply_late_fees(user_id, book_id, return_date):
     if (datetime.strptime(return_date, '%Y-%m-%d').date() > due_date):
         days_late = datetime.strptime(return_date, '%Y-%m-%d').date() - due_date
         days_late = float(str(days_late).split(' ')[0])
-        #print('days late:', days_late)
         
         if (days_late <= 6):
             fee = days_late * 0.25
@@ -506,8 +507,6 @@ def apply_late_fees(user_id, book_id, return_date):
             AND book_id = {book_id}"""
         
         exec_commit(sql)
-
-    return fee
 
 def main():
     rebuild_tables()
